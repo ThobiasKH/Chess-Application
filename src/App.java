@@ -21,6 +21,8 @@ import moves.Move;
 import pieces.Piece;
 import player.Player;
 
+// Sick change
+
 public class App {
     private static final int DESIRED_FPS = 240;
     private static final BoardRepresentation chessBoardRep = new BoardRepresentation();
