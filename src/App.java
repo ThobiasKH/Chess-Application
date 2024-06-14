@@ -36,21 +36,21 @@ public class App {
         BoardRepresentation.orientForPlayer = false;
         BoardRepresentation.debugMode = false;
 
-        SwingUtilities.invokeLater(() -> {
-            setupUI();
+        // SwingUtilities.invokeLater(() -> {
+        //     setupUI();
 
-            Timer b = new Timer();
-            TimerTask c = new TimerTask() {
-                public void run() {
-                    chessBoardRep.repaint();
+        //     Timer b = new Timer();
+        //     TimerTask c = new TimerTask() {
+        //         public void run() {
+        //             chessBoardRep.repaint();
 
-                    int buttonIconAsPieceCode = Player.getSide() == (Piece.White | Piece.Black) ? Player.desiredPromotion | Board.sideToMove : Player.desiredPromotion | Player.getSide();
-                    ImageIcon icon = new ImageIcon(Piece.getImageForPieceScaled(buttonIconAsPieceCode, (float)0.7));
-                    button.setIcon(icon);
-                }
-            };
-            b.scheduleAtFixedRate(c, 0, 1000 / DESIRED_FPS);
-        });  
+        //             int buttonIconAsPieceCode = Player.getSide() == (Piece.White | Piece.Black) ? Player.desiredPromotion | Board.sideToMove : Player.desiredPromotion | Player.getSide();
+        //             ImageIcon icon = new ImageIcon(Piece.getImageForPieceScaled(buttonIconAsPieceCode, (float)0.7));
+        //             button.setIcon(icon);
+        //         }
+        //     };
+        //     b.scheduleAtFixedRate(c, 0, 1000 / DESIRED_FPS);
+        // });  
     }
 
     private static int moveGenTest(int depth, boolean isFirst) {
