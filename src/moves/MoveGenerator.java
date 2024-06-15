@@ -1,6 +1,7 @@
 package moves;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.IntStream;
 
@@ -22,15 +23,15 @@ public class MoveGenerator {
 
     // Enemy pieces
     private static int enemyKingSquare;
-    private static List<Integer> enemySlidingSquares = new ArrayList<Integer>();
-    private static List<Integer> enemyKnightSquares = new ArrayList<Integer>(); 
-    private static List<Integer> enemyPawnSquares = new ArrayList<Integer>();
+    private static int[] enemySlidingSquares;
+    private static int[] enemyKnightSquares;
+    private static int[] enemyPawnSquares;
 
     // Friendly pieces
     private static int friendlyKingSquare;
-    private static List<Integer> friendlySlidingSquares = new ArrayList<Integer>();
-    private static List<Integer> friendlyKnightSquares = new ArrayList<Integer>();
-    private static List<Integer> friendlyPawnSquares = new ArrayList<Integer>();
+    private static int[] friendlySlidingSquares;
+    private static int[] friendlyKnightSquares;
+    private static int[] friendlyPawnSquares;
 
     public static List<Move> generateMoves() {
         List<Move> moves = new ArrayList<Move>();
@@ -61,24 +62,32 @@ public class MoveGenerator {
         inDoubleCheck = false;
         // pinsExist = false;
 
-        isWhiteToMove = Board.sideToMove == Piece.White;
-        friendlyColor = isWhiteToMove ? Piece.White : Piece.Black;
-        enemyColor = isWhiteToMove ? Piece.Black : Piece.White;
+        isWhiteToMove = Board.isWhiteToMove;
+        friendlyColor = Board.sideToMove;
+        enemyColor    = Board.enemyColor;
 
         squareIsControlledByEnemy = new boolean[64];
         squareIsPinned = new boolean[64];
         traversableSquaresIfSquareIsPinned = new int[64][];
 
+        long enemySlidingPiecesBitBoard = Board.bitBoards[enemyColor | Piece.Queen] | Board.bitBoards[enemyColor | Piece.Bishop] | Board.bitBoards[enemyColor | Piece.Rook];
+        enemySlidingSquares = new int[ Long.bitCount(enemySlidingPiecesBitBoard) ];
+        enemyKnightSquares  = new int[ Long.bitCount( Board.bitBoards[enemyColor | Piece.Knight] ) ];
+        enemyPawnSquares    = new int[ Long.bitCount( Board.bitBoards[enemyColor | Piece.Pawn] ) ];
 
-        enemySlidingSquares.clear();
-        enemyKnightSquares.clear();
-        enemyPawnSquares.clear();
-
-        friendlySlidingSquares.clear();
-        friendlyKnightSquares.clear();
-        friendlyPawnSquares.clear();
+        long friendlySlidingPiecesBitBoard = Board.bitBoards[friendlyColor | Piece.Queen] | Board.bitBoards[friendlyColor | Piece.Bishop] | Board.bitBoards[friendlyColor | Piece.Rook];
+        friendlySlidingSquares = new int[ Long.bitCount(enemySlidingPiecesBitBoard) ];
+        friendlyKnightSquares  = new int[ Long.bitCount( Board.bitBoards[enemyColor | Piece.Knight] ) ];
+        friendlyPawnSquares    = new int[ Long.bitCount( Board.bitBoards[enemyColor | Piece.Pawn] ) ];
 
         squaresThatSatisfyCheckRay = null;
+
+        int ESSCount = 0;
+        int EKSCount = 0;
+        int EPSCount = 0;
+        int FSSCount = 0;
+        int FKSCount = 0;
+        int FPSCount = 0;
 
         for (int i = 0; i < 64; i++) {
             int piece = Board.Square[i];
@@ -87,10 +96,11 @@ public class MoveGenerator {
             if (color == friendlyColor) {
 
                 if (type == Piece.Pawn) {
-                    friendlyPawnSquares.add(i);
+                    friendlyPawnSquares[FPSCount++] = i;
+                    continue;
                 }
                 if (Piece.isSlidingPiece(piece)) {
-                    friendlySlidingSquares.add(i);
+                    friendlySlidingSquares[FSSCount++] = i;
                     continue;
                 }
                 if (type == Piece.King) {
@@ -98,7 +108,7 @@ public class MoveGenerator {
                     continue;
                 }
                 if (Piece.getType(piece) == Piece.Knight) {
-                    friendlyKnightSquares.add(i);
+                    friendlyKnightSquares[FKSCount++] = i;
                     continue;
                 }
 
@@ -107,10 +117,11 @@ public class MoveGenerator {
             if (color == enemyColor) {
 
                 if (type == Piece.Pawn) {
-                    enemyPawnSquares.add(i);
+                    enemyPawnSquares[EPSCount++] = i;
+                    continue;
                 }
                 if (Piece.isSlidingPiece(piece)) {
-                    enemySlidingSquares.add(i);
+                    enemySlidingSquares[ESSCount++] = i;
                     continue;
                 }
                 if (type == Piece.King) {
@@ -118,7 +129,7 @@ public class MoveGenerator {
                     continue;
                 }
                 if (type == Piece.Knight) {
-                    enemyKnightSquares.add(i);
+                    enemyKnightSquares[EKSCount++] = i;
                     continue;
                 }
 
@@ -206,8 +217,8 @@ public class MoveGenerator {
             if (inDoubleCheck) break;
         }
 
-        for (int i = 0; i < enemyKnightSquares.size(); i++) {
-            int enemyKnightSquare = enemyKnightSquares.get(i);
+        for (int i = 0; i < enemyKnightSquares.length; i++) {
+            int enemyKnightSquare = enemyKnightSquares[i];
             int[] squaresControlledByCurrentKnight = PrecomputedMoveData.knightSquares[enemyKnightSquare];
             for (int square : squaresControlledByCurrentKnight) {
                 if (square == -1) continue;
@@ -225,8 +236,8 @@ public class MoveGenerator {
             squareIsControlledByEnemy[enemyKingControlledSquare] = true;
         }
 
-        for (int i = 0; i < enemyPawnSquares.size(); i++) {
-            int enemyPawnSquare = enemyPawnSquares.get(i);
+        for (int i = 0; i < enemyPawnSquares.length; i++) {
+            int enemyPawnSquare = enemyPawnSquares[i];
             int forward = enemyColor == Piece.White ? -8 : 8;
             int attack1 = forward - 1;
             int attack2 = forward + 1;

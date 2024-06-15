@@ -14,14 +14,21 @@ import player.Player;
 public class Board {
     public static BoardRepresentation boardRep;
 
-    public static int[] Square = new int[64];
-    public static int sideToMove = Piece.White;
+    public static boolean isWhiteToMove ;
+    public static int sideToMove;
+    public static int enemyColor;
 
-    private static int whiteCastlingRights = 0b000;
-    private static int blackCastlingRights = 0b000;
+    public static int[] Square;
+
+    public static long[] bitBoards; // Initialize bitboards array to max piece value
+
+    private static int whiteCastlingRights;
+    private static int blackCastlingRights;
+
+    //* Lookups for previous things that have happened 
+    // TODO maybe create separate class
     public static List<Integer> whiteCastlingRightsHistory = new ArrayList<Integer>();
     public static List<Integer> blackCastlingRightsHistory = new ArrayList<Integer>();
- 
     public static List<Move> movesPlayedInGame = new ArrayList<Move>();
 
     public static List<Move> legalMovesInCurrentPosition = new ArrayList<Move>();
@@ -31,7 +38,40 @@ public class Board {
         legalMovesInCurrentPosition.addAll(MoveGenerator.generateMoves());
     }
 
+    private static void init() {
+        isWhiteToMove = true;
+        sideToMove = isWhiteToMove ? Piece.White : Piece.Black;
+        enemyColor = isWhiteToMove ? Piece.Black : Piece.White;
+
+        Square = new int[64];
+
+        bitBoards = new long[(Piece.Black | Piece.Pawn) + 1]; // Max piece value
+
+        bitBoards[Piece.White | Piece.King]    = 0;
+        bitBoards[Piece.White | Piece.Queen]   = 0;
+        bitBoards[Piece.White | Piece.Bishop]  = 0;
+        bitBoards[Piece.White | Piece.Knight]  = 0;
+        bitBoards[Piece.White | Piece.Rook]    = 0;
+
+        bitBoards[Piece.Black | Piece.King]    = 0;
+        bitBoards[Piece.Black | Piece.Queen]   = 0;
+        bitBoards[Piece.Black | Piece.Bishop]  = 0;
+        bitBoards[Piece.Black | Piece.Knight]  = 0;
+        bitBoards[Piece.Black | Piece.Rook]    = 0;
+
+        whiteCastlingRights = 0b000;
+        blackCastlingRights = 0b000;
+
+        whiteCastlingRightsHistory.clear();
+        blackCastlingRightsHistory.clear();
+        movesPlayedInGame.clear();
+
+        legalMovesInCurrentPosition.clear();
+    }   
+
     public static void loadPositionFromFEN(String fenString) {
+        init();
+
         Dictionary<Character, Integer> pieceTypeFromSymbol = new Hashtable<>();
         pieceTypeFromSymbol.put('k', Piece.King  );    
         pieceTypeFromSymbol.put('q', Piece.Queen );
@@ -48,6 +88,17 @@ public class Board {
         int file = 0;
         int rank = 0;
 
+        if (fenSideToMove.equals("w")) {
+            isWhiteToMove = true;
+            sideToMove = Piece.White;
+            enemyColor = Piece.Black; 
+        }
+        if (fenSideToMove.equals("b")) {
+            isWhiteToMove = false;
+            sideToMove = Piece.Black; 
+            enemyColor = Piece.White;
+        }
+
         for (char symbol : fenBoard.toCharArray()) {
             if (symbol == '/') {
                 file = 0;
@@ -58,25 +109,22 @@ public class Board {
                     file += (int) Character.getNumericValue(symbol);
                 }
                 else {
+                    int index = getIndex(rank, file);
                     int pieceColor = (Character.isUpperCase(symbol)) ? Piece.White : Piece.Black;
                     int pieceType = pieceTypeFromSymbol.get(Character.toLowerCase(symbol));
-                    Square[rank * 8 + file] = pieceColor | pieceType;
+
+
+                    Square[index] = pieceColor | pieceType;
+                    bitBoards[pieceColor | pieceType] |= (1L << index);
+
                     file++;
                 }
             }
         }   
 
-        if (fenSideToMove.equals("w")) sideToMove = Piece.White;
-        if (fenSideToMove.equals("b")) sideToMove = Piece.Black;
-
         boolean fenStringContainsCastlingInformation = fenCastlingRights.length() > 0;
 
-        //! FIX
         if (fenStringContainsCastlingInformation) {
-            
-            setCastlingRights(Piece.White, 0b000);
-            setCastlingRights(Piece.Black, 0b000);
-
             for (char symbol : fenCastlingRights.toCharArray()) {
                 int color = Character.isUpperCase(symbol) ? Piece.White : Piece.Black;
                 int side = 0;
@@ -135,6 +183,20 @@ public class Board {
         }
     }   
 
+    private static void updateBitBoards() {
+        for (long bitBoard : bitBoards) {
+            bitBoard = 0;
+        }
+
+        for (int index = 0; index < 64; index++) {
+            int piece = Square[index];
+            if (piece != Piece.None) {
+                bitBoards[piece] |= 1 << index;
+            }
+        }
+    }
+
+    // TODO HANDLE BITBOARD UPDATING IN makeMove & unMakeMove
     public static void makeMove(Move move, boolean inSearch) {
         int pieceToMove = Square[move.startSquare];
         int colorOfPieceToMove = Piece.getColor(pieceToMove);
@@ -207,7 +269,10 @@ public class Board {
             }
         }
 
-        sideToMove = sideToMove == Piece.White ? Piece.Black : Piece.White;
+        isWhiteToMove = !isWhiteToMove;
+        sideToMove = isWhiteToMove ? Piece.White : Piece.Black;
+        enemyColor = isWhiteToMove ? Piece.Black : Piece.White;
+        updateBitBoards();
 
         movesPlayedInGame.add(move);
         if (!inSearch) boardRep.indexOfPickedPieceHasChanged = true;
@@ -263,7 +328,10 @@ public class Board {
             }
         }
     
-        sideToMove = sideToMove == Piece.White ? Piece.Black : Piece.White;
+        isWhiteToMove = !isWhiteToMove;
+        sideToMove = isWhiteToMove ? Piece.White : Piece.Black;
+        enemyColor = isWhiteToMove ? Piece.Black : Piece.White;
+        updateBitBoards();
 
         if (movesPlayedInGame.size() > 0) movesPlayedInGame.remove(movesPlayedInGame.size() - 1);
         if (!inSearch) boardRep.indexOfPickedPieceHasChanged = true;
