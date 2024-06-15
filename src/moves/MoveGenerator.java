@@ -71,12 +71,12 @@ public class MoveGenerator {
         traversableSquaresIfSquareIsPinned = new int[64][];
 
         long enemySlidingPiecesBitBoard = Board.bitBoards[enemyColor | Piece.Queen] | Board.bitBoards[enemyColor | Piece.Bishop] | Board.bitBoards[enemyColor | Piece.Rook];
-        enemySlidingSquares = new int[ Long.bitCount(enemySlidingPiecesBitBoard) ];
+        enemySlidingSquares = new int[ Long.bitCount( enemySlidingPiecesBitBoard) ];
         enemyKnightSquares  = new int[ Long.bitCount( Board.bitBoards[enemyColor | Piece.Knight] ) ];
         enemyPawnSquares    = new int[ Long.bitCount( Board.bitBoards[enemyColor | Piece.Pawn] ) ];
 
         long friendlySlidingPiecesBitBoard = Board.bitBoards[friendlyColor | Piece.Queen] | Board.bitBoards[friendlyColor | Piece.Bishop] | Board.bitBoards[friendlyColor | Piece.Rook];
-        friendlySlidingSquares = new int[ Long.bitCount(enemySlidingPiecesBitBoard) ];
+        friendlySlidingSquares = new int[ Long.bitCount( friendlySlidingPiecesBitBoard) ];
         friendlyKnightSquares  = new int[ Long.bitCount( Board.bitBoards[enemyColor | Piece.Knight] ) ];
         friendlyPawnSquares    = new int[ Long.bitCount( Board.bitBoards[enemyColor | Piece.Pawn] ) ];
 
