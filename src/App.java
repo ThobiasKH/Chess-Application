@@ -35,6 +35,8 @@ public class App {
         Board.generateLegalMoves();
         BoardRepresentation.orientForPlayer = false;
         BoardRepresentation.debugMode = false;
+        
+        moveGenTest(1, false);
 
         SwingUtilities.invokeLater(() -> {
             setupUI();

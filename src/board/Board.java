@@ -184,7 +184,7 @@ public class Board {
     }   
 
     private static void updateBitBoards() {
-        for (long bitBoard : bitBoards) {
+        for (@SuppressWarnings("unused") long bitBoard : bitBoards) {
             bitBoard = 0;
         }
 
