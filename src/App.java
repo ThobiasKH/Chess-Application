@@ -21,8 +21,6 @@ import moves.Move;
 import pieces.Piece;
 import player.Player;
 
-// Sick change
-
 public class App {
     private static final int DESIRED_FPS = 240;
     private static final BoardRepresentation chessBoardRep = new BoardRepresentation();
@@ -35,24 +33,27 @@ public class App {
         Board.generateLegalMoves();
         BoardRepresentation.orientForPlayer = false;
         BoardRepresentation.debugMode = false;
-        
-        moveGenTest(1, false);
 
-        SwingUtilities.invokeLater(() -> {
-            setupUI();
+        final long startTime = System.currentTimeMillis();
+        System.out.println(moveGenTest(2, false));
+        final long endTime = System.currentTimeMillis();
+        System.out.println("Time to execute: " + (endTime - startTime) + "ms");
 
-            Timer b = new Timer();
-            TimerTask c = new TimerTask() {
-                public void run() {
-                    chessBoardRep.repaint();
+        // SwingUtilities.invokeLater(() -> {
+        //     setupUI();
 
-                    int buttonIconAsPieceCode = Player.getSide() == (Piece.White | Piece.Black) ? Player.desiredPromotion | Board.sideToMove : Player.desiredPromotion | Player.getSide();
-                    ImageIcon icon = new ImageIcon(Piece.getImageForPieceScaled(buttonIconAsPieceCode, (float)0.7));
-                    button.setIcon(icon);
-                }
-            };
-            b.scheduleAtFixedRate(c, 0, 1000 / DESIRED_FPS);
-        });  
+        //     Timer b = new Timer();
+        //     TimerTask c = new TimerTask() {
+        //         public void run() {
+        //             chessBoardRep.repaint();
+
+        //             int buttonIconAsPieceCode = Player.getSide() == (Piece.White | Piece.Black) ? Player.desiredPromotion | Board.sideToMove : Player.desiredPromotion | Player.getSide();
+        //             ImageIcon icon = new ImageIcon(Piece.getImageForPieceScaled(buttonIconAsPieceCode, (float)0.7));
+        //             button.setIcon(icon);
+        //         }
+        //     };
+        //     b.scheduleAtFixedRate(c, 0, 1000 / DESIRED_FPS);
+        // });  
     }
 
     private static int moveGenTest(int depth, boolean isFirst) {
