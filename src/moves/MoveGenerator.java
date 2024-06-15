@@ -59,7 +59,6 @@ public class MoveGenerator {
     private static void init() {
         inCheck = false;
         inDoubleCheck = false;
-        // pinsExist = false;
 
         isWhiteToMove = Board.isWhiteToMove;
         friendlyColor = Board.sideToMove;
@@ -194,7 +193,6 @@ public class MoveGenerator {
                         if ( isDiagonal && Piece.slidesDiagonally(piece) || !isDiagonal && Piece.slidesOrthogonally(piece)) {
 
                             if (isFriendlyPieceAlongRay) {
-                                // pinsExist = true;
                                 squareIsPinned[friendlyPieceSquare] = true;
                                 traversableSquaresIfSquareIsPinned[friendlyPieceSquare] = calculateTraversableSquaresAlongRay(friendlyPieceSquare, dir);
                             }
