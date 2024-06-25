@@ -354,6 +354,7 @@ public class MoveGenerator {
 
     private static boolean canCastle(int side) {
         if (!Board.canCastle(friendlyColor | side)) return false;
+        if (inCheck) return false;
 
         boolean kingIsOnRequiredSquare = friendlyColor == Piece.White ? friendlyKingSquare == 60 : friendlyKingSquare == 60 - 56;
         if (!kingIsOnRequiredSquare) return false;

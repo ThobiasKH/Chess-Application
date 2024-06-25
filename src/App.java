@@ -31,10 +31,14 @@ public class App {
     public static void main(String[] args) throws Exception {
         Board.boardRep = chessBoardRep;
 
+        // Board.loadPositionFromFEN("rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ");
         Board.loadPositionFromFEN(Board.START_FEN);
         Board.generateLegalMoves();
         BoardRepresentation.orientForPlayer = false;
         BoardRepresentation.debugMode = false;
+
+        int numMoves = moveGenTest(3, true);
+        System.out.println("num total:" + numMoves);
 
         SwingUtilities.invokeLater(() -> {
             setupUI();
@@ -57,17 +61,19 @@ public class App {
         if (depth == 0) return 1;
         List<Move> moves = MoveGenerator.generateMoves();
         int numPositions = 0;
+        int numPositionsCurrent = 0;
 
         for (Move move : moves) {
             Board.makeMove(move, false);
-            numPositions += moveGenTest(depth - 1, false);
+            numPositionsCurrent = moveGenTest(depth - 1, false);
             Board.unMakeMove(move, false);
             if (isFirst) {
                 System.out.println("start: " + move.startSquare);
                 System.out.println("target: " + move.targetSquare);
-                System.out.println("num: " + numPositions);
+                System.out.println("currentNum: " + numPositionsCurrent);
                 System.out.println("    ");
             }
+            numPositions += numPositionsCurrent;
         }
 
         return numPositions;
